@@ -24,7 +24,16 @@ wsServer.on('connection', function (socket) {
 const host = `ws://localhost:3000`;
 const socket = new WebSocket(host);
 
-socket.onopen = function () {
+socket.on('open', function () {
     console.log(`New WebSocket connection on ${host} established`);
     socket.send('Hello server!');
+});
+const handleTerminationSignals = () => {
+    console.log("Terminating program...");
+    wsServer.close(() => {
+        process.exit(0);
+    });
 };
+
+process.on('SIGINT', handleTerminationSignals);
+process.on('SIGTERM', handleTerminationSignals); 
