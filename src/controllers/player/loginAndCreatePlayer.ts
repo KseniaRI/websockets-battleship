@@ -1,8 +1,11 @@
+import { WebSocket } from "ws";
 import { generateIdx } from "../../helpers/generateIdx.js";
 import { ILoginReq, ILoginReqData, ILoginRes, ILoginResData } from "../../models/loginModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
+import { updateRoom } from "../room/updateRoom.js";
+import { updateWinners } from "./updateWinners.js";
 
-export const loginAndCreatePlayer = (req: ILoginReq): ILoginRes => {
+export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket) => {
     const { data } = req;
     const parsedData: ILoginReqData = JSON.parse(data);
     const name = parsedData.name;
@@ -15,9 +18,13 @@ export const loginAndCreatePlayer = (req: ILoginReq): ILoginRes => {
         errorText: ''
     };
       
-    return  {
+    const res: ILoginRes =  {
         type: EResType.REG,
         data: JSON.stringify(resData),
         id: 0
     }
+
+    socket.send(JSON.stringify(res));
+    updateRoom(socket, []);
+    updateWinners(socket, []);
 }

@@ -1,11 +1,10 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { httpServer } from "./src/http_server/index.ts";
-import { ILoginReq, ILoginRes } from './src/models/loginModels.ts';
-import { ICreateRoomReq, IUpdateRoom } from './src/models/roomModels.ts';
+import { ILoginReq } from './src/models/loginModels.ts';
+import { ICreateRoomReq } from './src/models/roomModels.ts';
 import { handleRequest } from './src/lib/handleRequest.ts';
 
 type ReqTypes = ILoginReq | ICreateRoomReq;
-type ResTypes = ILoginRes | IUpdateRoom | undefined;
 
 const HTTP_PORT = 8181;
 const WS_PORT = 3000;
@@ -21,8 +20,7 @@ const wsServer = new WebSocketServer({ port: WS_PORT }, () => {
 wsServer.on('connection', (socket: WebSocket) => {
     socket.on('message', async (message) => {
         const req: ReqTypes = JSON.parse(message.toString());
-        const res: ResTypes = handleRequest(req);
-        socket.send(JSON.stringify(res));
+        handleRequest(req, socket);
     });
     
     socket.on('close', function () {

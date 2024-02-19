@@ -6,5 +6,6 @@ export enum EReqType {
 export enum EResType {
     REG = "reg",
     UPDATE_ROOM = "update_room",
+    UPDATE_WINNERS = "update_winners"
 }
 
