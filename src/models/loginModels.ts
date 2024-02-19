@@ -1,10 +1,4 @@
-export enum EReqType {
-    REG = "reg",
-}
-
-export enum EResType {
-    REG = "reg",
-}
+import { EReqType, EResType } from "./reqAndResModels.js";
 
 export interface ILoginReqData {
     name: string,
@@ -19,7 +13,7 @@ export interface ILoginReq {
 
 export interface ILoginResData {
     name: string,
-    index: number,
+    index: string,
     error: boolean,
     errorText: string,
 }

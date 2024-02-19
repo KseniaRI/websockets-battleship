@@ -1,7 +1,11 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { httpServer } from "./src/http_server/index.ts";
-import { EReqType, ILoginReq, ILoginRes } from "./src/models/gameModels.ts";
-import { loginAndCreatePlayer } from './src/controllers/player/loginAndCreatePlayer.ts';
+import { ILoginReq, ILoginRes } from './src/models/loginModels.ts';
+import { ICreateRoomReq, IUpdateRoom } from './src/models/roomModels.ts';
+import { handleRequest } from './src/lib/handleRequest.ts';
+
+type ReqTypes = ILoginReq | ICreateRoomReq;
+type ResTypes = ILoginRes | IUpdateRoom | undefined;
 
 const HTTP_PORT = 8181;
 const WS_PORT = 3000;
@@ -16,12 +20,8 @@ const wsServer = new WebSocketServer({ port: WS_PORT }, () => {
 
 wsServer.on('connection', (socket: WebSocket) => {
     socket.on('message', async (message) => {
-        const req: ILoginReq = JSON.parse(message.toString());
-        let res: ILoginRes | undefined;
-        
-        if (req.type === EReqType.REG) {
-            res = loginAndCreatePlayer(req);
-        }
+        const req: ReqTypes = JSON.parse(message.toString());
+        const res: ResTypes = handleRequest(req);
         socket.send(JSON.stringify(res));
     });
     
