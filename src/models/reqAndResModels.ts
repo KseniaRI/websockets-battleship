@@ -1,6 +1,7 @@
 export enum EReqType {
     REG = "reg",
     CREATE_ROOM = "create_room",
+    ADD_USER_TO_ROOM = "add_user_to_room"
 }
 
 export enum EResType {

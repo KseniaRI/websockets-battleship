@@ -23,8 +23,9 @@ export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket) => {
         data: JSON.stringify(resData),
         id: 0
     }
-
+    const loginRes: ILoginResData = JSON.parse(res.data);
     socket.send(JSON.stringify(res));
     updateRoom(socket, []);
     updateWinners(socket, []);
+    return JSON.parse(res.data);
 }
