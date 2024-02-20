@@ -4,11 +4,18 @@ import { ILoginReq, ILoginReqData, ILoginRes, ILoginResData } from "../../models
 import { EResType } from "../../models/reqAndResModels.js";
 import { updateRoom } from "../room/updateRoom.js";
 import { updateWinners } from "./updateWinners.js";
+import { IRoomData } from "../../models/roomModels.js";
 
-export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket) => {
+export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket, room?: IRoomData) => {
     const { data } = req;
     const parsedData: ILoginReqData = JSON.parse(data);
     const name = parsedData.name;
+
+    const existedUser = room?.roomUsers.find(user => user.name === name);
+    if (existedUser) {
+        console.log("User with the same name already exists");
+        return;
+    }
     const playerIndex = generateIdx(); 
 
     const resData: ILoginResData = {
@@ -23,9 +30,12 @@ export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket) => {
         data: JSON.stringify(resData),
         id: 0
     }
-    const loginRes: ILoginResData = JSON.parse(res.data);
+
     socket.send(JSON.stringify(res));
-    updateRoom(socket, []);
+
+    (!room) ? updateRoom(socket, []) : updateRoom(socket, [room]);
+
     updateWinners(socket, []);
+
     return JSON.parse(res.data);
 }

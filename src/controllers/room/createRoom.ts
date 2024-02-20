@@ -17,4 +17,5 @@ export const createRoom = (socket: WebSocket) => {
         id: 0,
     }
     socket.send(JSON.stringify(res));
+    return newRoomData;
 }
