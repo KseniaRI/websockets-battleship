@@ -2,8 +2,12 @@ import { IAddUserToRoomReq, IDataToAddUser, IRoomData } from "../../models/roomM
 import { updateRoom } from "./updateRoom.js";
 import { createGame } from "./createGame.js";
 import { ILoginResData } from "../../models/loginModels.js";
+import { WebSocket } from "ws";
 
-export const addUserToRoom = (req: IAddUserToRoomReq, room: IRoomData, loginRes: ILoginResData) => {
+const connections: { [key: string]: WebSocket } = {};
+
+export const addUserToRoom = (socket: WebSocket, req: IAddUserToRoomReq, room: IRoomData, loginRes: ILoginResData) => {
+    connections[loginRes.name] = socket;
     const { data } = req;
     const parsedData: IDataToAddUser = JSON.parse(data);
     const indexRoom = parsedData.indexRoom;
@@ -28,7 +32,7 @@ export const addUserToRoom = (req: IAddUserToRoomReq, room: IRoomData, loginRes:
     if (roomData.roomUsers.length < 2) {
         updateRoom([roomData]);   
     } else if (roomData.roomUsers.length === 2) {
-        createGame(loginRes.index);
+        createGame(connections, roomData.roomUsers);
         updateRoom([]);
     }
     return roomData;

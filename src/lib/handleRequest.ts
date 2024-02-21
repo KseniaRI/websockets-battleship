@@ -26,14 +26,14 @@ export const handleRequest = (req: ReqTypes, socket: WebSocket) => {
             break;
         }
         case EReqType.ADD_USER_TO_ROOM: {
-            const roomData = addUserToRoom(req, room, loginRes);
+            const roomData = addUserToRoom(socket,req, room, loginRes);
             if (roomData) {
                 room = { ...roomData };
             } 
             break;
         }      
         case EReqType.ADD_SHIPS:
-            addShips(req);
+            addShips(socket, req);
             break;
     }     
 }

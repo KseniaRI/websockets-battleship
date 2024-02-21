@@ -1,17 +1,17 @@
-import { EResType } from "../../models/reqAndResModels.js"
-import { IAddShipsReq, IStartGame, IStartGameData } from "../../models/shipsModels.js"
-import { sendToAllClients } from "../../ws_server/index.js"
+import { WebSocket } from "ws";
+import { IAddShipsData, IAddShipsReq } from "../../models/shipsModels.js"
+import { startGame } from "./startGame.js";
 
-export const addShips = (req: IAddShipsReq) => {
-    const { ships, indexPlayer } = JSON.parse(req.data);
-    const startGameData: IStartGameData = {
-        ships: [...ships],
-        currentPlayerIndex: indexPlayer, 
+const connections: { [key: string]:  WebSocket } = {};
+const clientsShipsData: IAddShipsData[] = [];
+
+export const addShips = (socket: WebSocket, req: IAddShipsReq) => {
+    const { indexPlayer } = JSON.parse(req.data);
+    connections[indexPlayer] = socket;
+    const shipsData: IAddShipsData = JSON.parse(req.data);
+    clientsShipsData.push(shipsData);
+
+    if (clientsShipsData.length === 2) {
+        startGame(connections, clientsShipsData); 
     }
-    const res: IStartGame = {
-        type: EResType.START_GAME,
-        data: JSON.stringify(startGameData),
-        id: 0,
-    };
-    sendToAllClients(res);
 }
