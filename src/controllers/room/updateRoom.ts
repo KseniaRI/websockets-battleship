@@ -1,12 +1,12 @@
-import { WebSocket } from "ws";
 import { IRoomData, IUpdateRoom } from "../../models/roomModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
+import { sendToAllClients } from "../../ws_server/index.js";
 
-export const updateRoom = (socket: WebSocket, roomData: IRoomData[]) => {
+export const updateRoom = (roomData: IRoomData[]) => {
     const res: IUpdateRoom = {
         type: EResType.UPDATE_ROOM,
         data: JSON.stringify(roomData),
         id: 0,
     }
-    socket.send(JSON.stringify(res));
+    sendToAllClients(res);
 }

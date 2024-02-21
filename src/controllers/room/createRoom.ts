@@ -1,21 +1,13 @@
-import { WebSocket } from "ws";
 import { generateIdx } from "../../helpers/generateIdx.js";
-import { EResType } from "../../models/reqAndResModels.js";
-import { IRoomData, IUpdateRoom } from "../../models/roomModels.js";
+import { IRoomData } from "../../models/roomModels.js";
+import { updateRoom } from "./updateRoom.js";
 
-export const createRoom = (socket: WebSocket) => {
+export const createRoom = () => {
     const roomId = generateIdx();
-
     const newRoomData: IRoomData = {
         roomId,
         roomUsers: [],
     };
-
-    const res: IUpdateRoom = {
-        type: EResType.UPDATE_ROOM,
-        data: JSON.stringify([ newRoomData ]),
-        id: 0,
-    }
-    socket.send(JSON.stringify(res));
+    updateRoom([newRoomData])
     return newRoomData;
 }

@@ -1,8 +1,8 @@
-import { WebSocket } from "ws";
 import { ICreateGame, ICreatedGameData } from "../../models/roomModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
+import { sendToAllClients } from "../../ws_server/index.js";
 
-export const createGame = (socket: WebSocket, index: string) => {
+export const createGame = (index: string) => {
     const createdGameData: ICreatedGameData = {
         idGame: index,
         idPlayer: index
@@ -12,5 +12,5 @@ export const createGame = (socket: WebSocket, index: string) => {
         data: JSON.stringify(createdGameData),
         id: 0
     };
-    socket.send(JSON.stringify(res)); 
+    sendToAllClients(res);
 }

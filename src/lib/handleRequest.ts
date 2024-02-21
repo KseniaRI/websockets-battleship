@@ -5,44 +5,35 @@ import { ILoginReq, ILoginResData } from "../models/loginModels.js";
 import { EReqType } from "../models/reqAndResModels.js";
 import { IAddUserToRoomReq, ICreateRoomReq, IRoomData } from "../models/roomModels.js";
 import { addUserToRoom } from "../controllers/room/addUserToRoom.js";
+import { addShips } from "../controllers/ships/addShips.js";
+import { IAddShipsReq } from "../models/shipsModels.js";
 
-type ReqTypes = ILoginReq | ICreateRoomReq | IAddUserToRoomReq;
+type ReqTypes = ILoginReq | ICreateRoomReq | IAddUserToRoomReq | IAddShipsReq;
+
 let loginRes: ILoginResData;
 let room: IRoomData;
 
 export const handleRequest = (req: ReqTypes, socket: WebSocket) => {
-
     switch (req.type) {
-        case EReqType.REG: {
-            console.log('login: ', room);
+        case EReqType.REG: 
             room
                 ? loginRes = loginAndCreatePlayer(req, socket, room)
                 : loginRes = loginAndCreatePlayer(req, socket);
-            
-            return loginRes;
-        }
-           
+            break;   
         case EReqType.CREATE_ROOM: {
-            const roomData = createRoom(socket);
+            const roomData = createRoom();
             room = { ...roomData };
-            console.log('create room: ', room);
-            return roomData;
+            break;
         }
         case EReqType.ADD_USER_TO_ROOM: {
-            const existedUser = room.roomUsers.find(user => user.name === loginRes.name);
-            if (existedUser) {
-                console.log("User with this name already in the room");
-                return;
+            const roomData = addUserToRoom(req, room, loginRes);
+            if (roomData) {
+                room = { ...roomData };
             } 
-            room.roomUsers = [
-                ...room.roomUsers,
-                {
-                    name: loginRes.name,
-                    index: loginRes.index
-                }
-            ];
-            console.log('add user: ', room);
-            return addUserToRoom(req, socket, room, loginRes);    
-        }           
+            break;
+        }      
+        case EReqType.ADD_SHIPS:
+            addShips(req);
+            break;
     }     
 }
