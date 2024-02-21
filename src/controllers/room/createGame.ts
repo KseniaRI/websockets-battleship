@@ -6,8 +6,8 @@ import { generateIdx } from "../../helpers/generateIdx.js";
 
 export const createGame = (connections: TConnections, roomUsers: IRoomUser[]) => {
     const idGame = generateIdx();
-    roomUsers.forEach(({ name, index }) => {
-        const socket: WebSocket = connections[name];
+    roomUsers.forEach(({ index }) => {
+        const socket: WebSocket = connections[index];
         const createdGameData: ICreatedGameData = {
             idGame,
             idPlayer: index

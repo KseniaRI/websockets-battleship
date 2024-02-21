@@ -7,7 +7,7 @@ import { WebSocket } from "ws";
 const connections: { [key: string]: WebSocket } = {};
 
 export const addUserToRoom = (socket: WebSocket, req: IAddUserToRoomReq, room: IRoomData, loginRes: ILoginResData) => {
-    connections[loginRes.name] = socket;
+    connections[loginRes.index] = socket;
     const { data } = req;
     const parsedData: IDataToAddUser = JSON.parse(data);
     const indexRoom = parsedData.indexRoom;

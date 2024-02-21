@@ -1,6 +1,7 @@
 import { WebSocket } from "ws";
 import { IAddShipsData, IAddShipsReq } from "../../models/shipsModels.js"
 import { startGame } from "./startGame.js";
+import { setTurn } from "../game/setTurn.js";
 
 const connections: { [key: string]:  WebSocket } = {};
 const clientsShipsData: IAddShipsData[] = [];
@@ -13,5 +14,7 @@ export const addShips = (socket: WebSocket, req: IAddShipsReq) => {
 
     if (clientsShipsData.length === 2) {
         startGame(connections, clientsShipsData); 
+        const clientsIndexes = clientsShipsData.map(data => data.indexPlayer);
+        setTurn(connections, clientsIndexes);
     }
 }
