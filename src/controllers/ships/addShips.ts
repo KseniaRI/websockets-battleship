@@ -4,13 +4,13 @@ import { startGame } from "./startGame.js";
 import { setTurn } from "../game/setTurn.js";
 
 const connections: { [key: string]:  WebSocket } = {};
-const clientsShipsData: IAddShipsData[] = [];
+// const clientsShipsData: IAddShipsData[] = [];
 
-export const addShips = (socket: WebSocket, req: IAddShipsReq) => {
+export const addShips = (socket: WebSocket, req: IAddShipsReq, clientsShipsData: IAddShipsData[]) => {
     const { indexPlayer } = JSON.parse(req.data);
     connections[indexPlayer] = socket;
-    const shipsData: IAddShipsData = JSON.parse(req.data);
-    clientsShipsData.push(shipsData);
+    // const shipsData: IAddShipsData = JSON.parse(req.data);
+    // clientsShipsData.push(shipsData);
 
     if (clientsShipsData.length === 2) {
         startGame(connections, clientsShipsData); 

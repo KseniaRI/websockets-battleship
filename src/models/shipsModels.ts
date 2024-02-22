@@ -36,3 +36,10 @@ export interface IStartGame {
     data: string,
     id: 0
 }
+
+export interface IShipCell {
+    status: string,
+    position: IPosition
+}
+export type TEnemyShip = IShipCell[];
+export type TSchemaOfEnemyShips = TEnemyShip[];
