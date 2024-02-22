@@ -1,13 +1,9 @@
-import { IAddUserToRoomReq, IDataToAddUser, IRoomData } from "../../models/roomModels.js";
+import { IAddUserToRoomReq, IDataToAddUser, IRoomData, TConnections } from "../../models/roomModels.js";
 import { updateRoom } from "./updateRoom.js";
 import { createGame } from "./createGame.js";
 import { ILoginResData } from "../../models/loginModels.js";
-import { WebSocket } from "ws";
 
-const connections: { [key: string]: WebSocket } = {};
-
-export const addUserToRoom = (socket: WebSocket, req: IAddUserToRoomReq, room: IRoomData, loginRes: ILoginResData) => {
-    connections[loginRes.index] = socket;
+export const addUserToRoom = (req: IAddUserToRoomReq, room: IRoomData, loginRes: ILoginResData, connections: TConnections) => {
     const { data } = req;
     const parsedData: IDataToAddUser = JSON.parse(data);
     const indexRoom = parsedData.indexRoom;

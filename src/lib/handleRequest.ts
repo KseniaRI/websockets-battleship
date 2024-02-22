@@ -15,6 +15,7 @@ type ReqTypes = ILoginReq | ICreateRoomReq | IAddUserToRoomReq | IAddShipsReq | 
 let loginRes: ILoginResData;
 let room: IRoomData;
 const clientsShipsData: IAddShipsData[] = [];
+const connections: { [key: string]: WebSocket } = {};
 
 export const handleRequest = (req: ReqTypes, socket: WebSocket) => {
     switch (req.type) {
@@ -29,7 +30,8 @@ export const handleRequest = (req: ReqTypes, socket: WebSocket) => {
             break;
         }
         case EReqType.ADD_USER_TO_ROOM: {
-            const roomData = addUserToRoom(socket, req, room, loginRes);
+            connections[loginRes.index] = socket;
+            const roomData = addUserToRoom(req, room, loginRes, connections);
             if (roomData) {
                 room = { ...roomData };
             } 
@@ -38,12 +40,12 @@ export const handleRequest = (req: ReqTypes, socket: WebSocket) => {
         case EReqType.ADD_SHIPS: {
             const shipsData: IAddShipsData = JSON.parse(req.data);
             clientsShipsData.push(shipsData);
-            addShips(socket, req, clientsShipsData);
+            addShips(clientsShipsData, connections);
             break;
         }
            
         case EReqType.ATTACK:
-            attack(socket, req, clientsShipsData);
+            attack(req, clientsShipsData, connections);
             break;
     }     
 }

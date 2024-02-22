@@ -8,8 +8,9 @@ import { createSchemaOfShottedEnemyShips } from "./createScemaofShottedEnemyShip
 
 let schemaOfEnemyShips: TSchemaOfEnemyShips;
 
-export const sendAttackFeedback = (connections: TConnections, attacksData: IReqAttackData[], clientsShipsData: IAddShipsData[]) => {
-    attacksData.forEach(({ indexPlayer, x, y }) => {
+export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData, clientsShipsData: IAddShipsData[]) => {
+    const { indexPlayer: attackingPlayer, x, y } = attackData;
+    clientsShipsData.forEach(({ indexPlayer }) => {
         const socket: WebSocket = connections[indexPlayer];
         const enemyShipsData: IAddShipsData = clientsShipsData.find(shipsData => shipsData.indexPlayer !== indexPlayer)!;
         if (!schemaOfEnemyShips) {
@@ -42,17 +43,28 @@ export const sendAttackFeedback = (connections: TConnections, attacksData: IReqA
 
                 console.log(schemaOfEnemyShips)
 
-                const shipIsKilled = schemaOfEnemyShips.find(ship => ship.every(shipCell => shipCell.status === "shotted"));
-                if (shipIsKilled) {
+                const killedShip: TEnemyShip | undefined = schemaOfEnemyShips.find(ship => ship.every(shipCell => shipCell.status === "shotted" ));
+                if (killedShip) {
                     status = "killed";
+                    const indexOfKilledShip = schemaOfEnemyShips.indexOf(killedShip);
+                    const updatedKilledShip: TEnemyShip = killedShip.map((shipCell: IShipCell) => {
+                        return {
+                            ...shipCell,
+                            status: "isKilled"
+                        }
+                    });
+                    schemaOfEnemyShips[indexOfKilledShip] = updatedKilledShip;
+                    console.log(schemaOfEnemyShips)
                 }
             }     
         }
+        
         console.log(status);
-        if (status) {
+
+        if (status && status !== "killed") {
             const attackFeedbackData: IAttackFeedbackData = {
                 position: { x, y },
-                currentPlayer: indexPlayer, 
+                currentPlayer: attackingPlayer,
                 status,
             }
             const res: IAttackFeedback = {
@@ -61,6 +73,41 @@ export const sendAttackFeedback = (connections: TConnections, attacksData: IReqA
                 id: 0,
             }
             sendToClient(socket, res);
-        }  
+        } else if (status === "killed") {
+            shottedShip?.forEach((shipCell: IShipCell) => {
+                const attackFeedbackData: IAttackFeedbackData = {
+                    position: shipCell.position,
+                    currentPlayer: attackingPlayer,
+                    status: "killed",
+                }
+                const res: IAttackFeedback = {
+                    type: EResType.ATTACK,
+                    data: JSON.stringify(attackFeedbackData),
+                    id: 0,
+                }
+                sendToClient(socket, res);
+
+                const { x, y } = shipCell.position;
+
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const adjacentCell = { x: x + dx, y: y + dy };
+                        if (!shottedShip.some(cell => cell.position.x === adjacentCell.x && cell.position.y === adjacentCell.y)) {
+                            const missFeedbackData: IAttackFeedbackData = {
+                                position: adjacentCell,
+                                currentPlayer: attackingPlayer,
+                                status: "miss",
+                            };
+                            const missRes: IAttackFeedback = {
+                                type: EResType.ATTACK,
+                                data: JSON.stringify(missFeedbackData),
+                                id: 0,
+                            };
+                            sendToClient(socket, missRes);
+                        }
+                    }
+                }
+            })
+        }
     }) 
 }
