@@ -4,26 +4,17 @@ import { TConnections } from "../../models/roomModels.js";
 import WebSocket from "ws";
 import { sendToClient } from "../../ws_server/index.js";
 
-let currentPlayerIndex: string | undefined;
-
-export const setTurn = (connections: TConnections, clientsIndexes: string[]) => {
-    currentPlayerIndex = (!currentPlayerIndex)
-        ? clientsIndexes[0]
-        : clientsIndexes.find(playerIndex => currentPlayerIndex !== playerIndex);
-    
-    if (currentPlayerIndex) {
-        const turnData: ITurnData = {
-            currentPlayer: currentPlayerIndex,
-        }
-
-        const res: ITurn = {
-            type: EResType.TURN,
-            data: JSON.stringify(turnData),
-            id: 0
-        }
-        clientsIndexes.forEach(clientIndex => {
-            const socket: WebSocket = connections[clientIndex];
-            sendToClient(socket, res);
-        })
-    } 
+export const setTurn = (connections: TConnections, clientIndex: string) => {
+    const turnData: ITurnData = {
+        currentPlayer: clientIndex,
+    }
+    const res: ITurn = {
+        type: EResType.TURN,
+        data: JSON.stringify(turnData),
+        id: 0
+    }
+    for (const index in connections) { 
+        const socket: WebSocket = connections[index];
+        sendToClient(socket, res);
+    }
 }

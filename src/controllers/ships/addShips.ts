@@ -7,6 +7,6 @@ export const addShips = (clientsShipsData: IAddShipsData[], connections: TConnec
     if (clientsShipsData.length === 2) {
         startGame(connections, clientsShipsData); 
         const clientsIndexes = clientsShipsData.map(data => data.indexPlayer);
-        setTurn(connections, clientsIndexes);
+        setTurn(connections, clientsIndexes[0]);
     }
 }
