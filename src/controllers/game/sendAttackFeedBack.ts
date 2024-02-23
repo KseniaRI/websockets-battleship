@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { IAttackFeedbackData, IAttackStatus, IReqAttackData } from "../../models/gameModels.js";
+import { IAttackFeedbackData, IAttackStatus, IRandomAttackData, IReqAttackData } from "../../models/gameModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
 import { TConnections } from "../../models/roomModels.js";
 import { sendToClient } from "../../ws_server/index.js";
@@ -7,11 +7,14 @@ import { IAddShipsData, IShipCell, TSchemaOfEnemyShips, TEnemyShip } from "../..
 import { createSchemaOfShottedEnemyShips } from "./createScemaofShottedEnemyShips.js";
 import { sendData, sendDataToAdjiacentCell } from "../../helpers/sendData.js";
 import { setTurn } from "./setTurn.js";
+import { getAttachedCoordinates } from "../../helpers/generateCoord.js";
 
 let schemaOfEnemyShips: TSchemaOfEnemyShips | undefined;
 
-export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData, clientsShipsData: IAddShipsData[]) => {
-    const { indexPlayer: attackingPlayer, x, y } = attackData;
+export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData | IRandomAttackData, clientsShipsData: IAddShipsData[]) => {
+    const { indexPlayer: attackingPlayer } = attackData;
+    const { x, y } = getAttachedCoordinates(attackData); 
+
     const enemyShipsData: IAddShipsData = clientsShipsData.find(shipsData =>
         shipsData.indexPlayer !== attackingPlayer)!;
     if (!schemaOfEnemyShips) {
