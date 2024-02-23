@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { IAttackFeedbackData, IAttackStatus, IRandomAttackData, IReqAttackData } from "../../models/gameModels.js";
+import { IAttackFeedbackData, IAttackStatus, IFinishData, IRandomAttackData, IReqAttackData } from "../../models/gameModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
 import { TConnections } from "../../models/roomModels.js";
 import { sendToClient } from "../../ws_server/index.js";
@@ -10,6 +10,7 @@ import { setTurn } from "./setTurn.js";
 import { getAttachedCoordinates } from "../../helpers/generateCoord.js";
 
 let schemaOfEnemyShips: TSchemaOfEnemyShips | undefined;
+let numberEnemyShips: number | undefined;
 
 export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData | IRandomAttackData, clientsShipsData: IAddShipsData[]) => {
     const { indexPlayer: attackingPlayer } = attackData;
@@ -17,9 +18,15 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
 
     const enemyShipsData: IAddShipsData = clientsShipsData.find(shipsData =>
         shipsData.indexPlayer !== attackingPlayer)!;
+    
+    if (!numberEnemyShips) {
+        numberEnemyShips= enemyShipsData.ships.length;
+    } 
+    
     if (!schemaOfEnemyShips) {
         schemaOfEnemyShips = createSchemaOfShottedEnemyShips(enemyShipsData.ships);
     }
+
     let status: IAttackStatus | undefined;
     
     const shottedShip: TEnemyShip | undefined = schemaOfEnemyShips.find((ship: TEnemyShip) =>
@@ -47,6 +54,7 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
             
             if (killedShip) {
                 status = "killed";
+                numberEnemyShips--;
                 const indexOfKilledShip = schemaOfEnemyShips.indexOf(killedShip);
                 const updatedKilledShip: TEnemyShip = killedShip.map((shipCell: IShipCell) => {
                     return {
@@ -81,6 +89,16 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
                 sendDataToAdjiacentCell(socket, shipCell.position, shottedShip, attackingPlayer);
             }
         })
+    }
+
+    if (numberEnemyShips === 0) {
+        const finishData: IFinishData = {
+            winPlayer: attackingPlayer
+        }
+        for (const index in connections) { 
+            const socket: WebSocket = connections[index];
+            sendData(socket, EResType.FINISH, finishData, sendToClient);
+        }
     }
 
     if (status === "killed" || status === "shot") {

@@ -19,7 +19,8 @@ export enum EResType {
     CREATE_GAME = "create_game",
     START_GAME = "start_game",
     TURN = "turn",
-    ATTACK= "attack"
+    ATTACK = "attack",
+    FINISH = "finish"
 }
 
 export type ReqType = ILoginReq | ICreateRoomReq | IAddUserToRoomReq | IAddShipsReq | IAttackReq | IRandomAttackReq;

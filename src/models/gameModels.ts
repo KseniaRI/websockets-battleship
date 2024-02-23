@@ -47,3 +47,13 @@ export interface IAttackFeedback {
     data: string,
     id: 0
 }
+
+export interface IFinishData {
+    winPlayer: string
+}
+
+export interface IFinish {
+    type: EResType.FINISH,
+    data: string,  
+    id: 0,
+}
