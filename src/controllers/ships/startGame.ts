@@ -2,7 +2,7 @@ import { WebSocket } from "ws";
 import { TConnections } from "../../models/roomModels.js";
 import { IAddShipsData, IStartGame, IStartGameData } from "../../models/shipsModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
-import { sendToClient } from "../../ws_server/index.js";
+import { sendToClient } from "../../helpers/sendData.js";
 
 export const startGame = (connections: TConnections, clientsShipsData: IAddShipsData[]) => {
     clientsShipsData.forEach(({ships, indexPlayer}) => {

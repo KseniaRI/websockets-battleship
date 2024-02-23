@@ -1,4 +1,4 @@
-import { IPosition, IShipCell, IShipsData, TSchemaOfEnemyShips, TEnemyShip } from "../../models/shipsModels.js";
+import { IPosition, IShipCell, IShipsData, TSchemaOfEnemyShips, TEnemyShip } from "../models/shipsModels.js";
 
 export const createSchemaOfShottedEnemyShips = (ships: IShipsData[]): TSchemaOfEnemyShips => {
     return ships.map((ship: IShipsData) => {

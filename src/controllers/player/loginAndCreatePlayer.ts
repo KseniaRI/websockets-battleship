@@ -4,16 +4,16 @@ import { ILoginReq, ILoginReqData, ILoginRes, ILoginResData } from "../../models
 import { EResType } from "../../models/reqAndResModels.js";
 import { updateRoom } from "../room/updateRoom.js";
 import { updateWinners } from "./updateWinners.js";
-import { IRoomData } from "../../models/roomModels.js";
-import { sendToClient } from '../../ws_server/index.js';
+import { IRoomData, IRoomUser } from "../../models/roomModels.js";
+import { sendToClient } from "../../helpers/sendData.js";
 
 export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket, room?: IRoomData) => {
     const { data } = req;
-    const parsedData: ILoginReqData = JSON.parse(data);
-    const name = parsedData.name;
+    const playerData: ILoginReqData = JSON.parse(data);
+    const name = playerData.name;
     const playerIndex = generateIdx(); 
     
-    const existedUser = room?.roomUsers.find(user => user.name === name);
+    const existedUser: IRoomUser | undefined = room?.roomUsers.find(user => user.name === name);
     
     if (existedUser) {
         console.log("User with the same name already exists");
@@ -36,7 +36,8 @@ export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket, room?: I
     sendToClient(socket, res);
 
     !room ? updateRoom([]) : updateRoom([room]);
-    updateWinners([]);
 
+    updateWinners([]);
+   
     return JSON.parse(res.data);
 }

@@ -10,3 +10,9 @@ export interface IUpdateWinners {
     data: string,
     id: 0
 }
+
+export interface IPlayerDashboardData {
+    name: string,
+    id: string,
+    wins: number
+}

@@ -28,7 +28,7 @@ export const addUserToRoom = (req: IAddUserToRoomReq, room: IRoomData, loginRes:
     if (roomData.roomUsers.length < 2) {
         updateRoom([roomData]);   
     } else if (roomData.roomUsers.length === 2) {
-        createGame(connections, roomData.roomUsers);
+        createGame(connections);
         updateRoom([]);
     }
     return roomData;

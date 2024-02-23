@@ -1,8 +1,7 @@
 import { EResType } from "../../models/reqAndResModels.js"
 import { ITurn, ITurnData } from "../../models/gameModels.js";
 import { TConnections } from "../../models/roomModels.js";
-import WebSocket from "ws";
-import { sendToClient } from "../../ws_server/index.js";
+import { sendToRoomClients } from "../../helpers/sendData.js";
 
 export const setTurn = (connections: TConnections, clientIndex: string) => {
     const turnData: ITurnData = {
@@ -13,8 +12,5 @@ export const setTurn = (connections: TConnections, clientIndex: string) => {
         data: JSON.stringify(turnData),
         id: 0
     }
-    for (const index in connections) { 
-        const socket: WebSocket = connections[index];
-        sendToClient(socket, res);
-    }
+    sendToRoomClients(connections, res);
 }

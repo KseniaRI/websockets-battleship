@@ -1,16 +1,27 @@
 import { WebSocket } from "ws";
+import { wsServer } from "../ws_server/index.js";
 import { EResType } from "../models/reqAndResModels.js";
 import { IPosition, TEnemyShip } from "../models/shipsModels.js";
 import { IAttackFeedbackData } from "../models/gameModels.js";
-import { sendToClient } from "../ws_server/index.js";
+import { TConnections } from "../models/roomModels.js";
 
-export const sendData = (socket: WebSocket, resType: EResType, dataToSend: any, callback: any) => {
-    const res = {
-        type: resType,
-        data: JSON.stringify(dataToSend),
-        id: 0,
+export const sendToAllClients = (message: any) => {
+    wsServer.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            sendToClient(client, message);
+        }
+    });
+};
+
+export const sendToClient = (client: WebSocket, message: any) => {
+    client.send(JSON.stringify(message));
+};
+
+export const sendToRoomClients = (connections: TConnections, res: any) => {
+    for (const index in connections) {
+        const socket: WebSocket = connections[index];
+        sendToClient(socket, res);
     }
-    callback(socket, res);
 }
 
 export const sendDataToAdjiacentCell = (socket: WebSocket, shipCellPosition: IPosition, shottedShip: TEnemyShip, attackingPlayer: string ) => {
@@ -28,7 +39,13 @@ export const sendDataToAdjiacentCell = (socket: WebSocket, shipCellPosition: IPo
                     currentPlayer: attackingPlayer,
                     status: "miss",
                 };
-                sendData(socket, EResType.ATTACK, missFeedbackData, sendToClient);
+
+                const res = {
+                    type: EResType.ATTACK,
+                    data: JSON.stringify(missFeedbackData),
+                    id: 0,
+                }
+                sendToClient(socket, res);   
             }
         }
     }
