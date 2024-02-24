@@ -34,7 +34,7 @@ export interface IRandomAttackReq {
     data: string,
     id: 0
 }
-export type IAttackStatus = "miss" | "killed" | "shot";
+export type IAttackStatus = "miss" | "killed" | "shot" | "";
 
 export interface IAttackFeedbackData {
     position: IPosition,

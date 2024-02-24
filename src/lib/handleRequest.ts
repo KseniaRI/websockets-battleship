@@ -28,7 +28,8 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
                 id: loginRes.index,
                 ships: [],
                 wins: 0,
-                numberOfShips: 0
+                numberOfShips: 0,
+                schemaOfEnemyShips: []
             };
             break;
         }

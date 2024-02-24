@@ -1,5 +1,5 @@
 import { WebSocket } from "ws"
-import { IShipsData } from "./shipsModels.js"
+import { IShipsData, TSchemaOfEnemyShips } from "./shipsModels.js"
 
 export type TConnections = {
     [key: string]: {
@@ -8,7 +8,8 @@ export type TConnections = {
         id: string,
         ships: IShipsData[],
         wins: number,
-        numberOfShips: number
+        numberOfShips: number,
+        schemaOfEnemyShips: TSchemaOfEnemyShips 
     }
 }
 

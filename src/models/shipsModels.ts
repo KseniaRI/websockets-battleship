@@ -38,7 +38,7 @@ export interface IStartGame {
 }
 
 export interface IShipCell {
-    status: string,
+    status: "alive" | "isKilled" | "shotted" ,
     position: IPosition
 }
 export type TEnemyShip = IShipCell[];

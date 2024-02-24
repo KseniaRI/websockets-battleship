@@ -12,56 +12,68 @@ import {
     updateWinnersData,
 } from '../../helpers/index.js'
 
-let schemaOfEnemyShips: TSchemaOfEnemyShips | undefined;
-
 export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData | IRandomAttackData) => {
     const { indexPlayer: attackingPlayerId } = attackData;
-    const { x, y } = getAttackedCoordinates(attackData); 
+    const { x, y } = getAttackedCoordinates(attackData);
     
     const enemyPlayerId = Object.keys(connections).find(key => key !== attackingPlayerId)!;
     const enemyShips: IShipsData[] = connections[enemyPlayerId].ships;
-    
-    if (!schemaOfEnemyShips) {
-        schemaOfEnemyShips = createSchemaOfShottedEnemyShips(enemyShips);
-    }
 
+    let schemaOfEnemyShips = connections[attackingPlayerId].schemaOfEnemyShips;
+
+    if (schemaOfEnemyShips.length === 0) {
+        connections[attackingPlayerId].schemaOfEnemyShips = [...createSchemaOfShottedEnemyShips(enemyShips)]; 
+        schemaOfEnemyShips = connections[attackingPlayerId].schemaOfEnemyShips;
+    } else {
+        
     let status: IAttackStatus | undefined;
     
     const shottedShip: TEnemyShip | undefined = schemaOfEnemyShips.find((ship: TEnemyShip) =>
-        ship.find((shipCell: IShipCell) =>
-        shipCell.position.x === x && shipCell.position.y === y));
+        ship.find((shipCell: IShipCell) => shipCell.position.x === x && shipCell.position.y === y)
+    )        
     
     if (!shottedShip) {
         status = "miss";
     } else {
-        status = shottedShip.length === 1 ? "killed" : "shot";
-        const indexOfShottedShip = schemaOfEnemyShips.indexOf(shottedShip);
-        let shottedCell: IShipCell | undefined = shottedShip.find((shipCell: IShipCell) =>
-            shipCell.position.x === x && shipCell.position.y === y);
-        if (shottedCell) {
-            shottedCell.status = "shotted"; 
-            
-            const updatedShottedShip = shottedShip.map((shipCell: IShipCell) => {
-                if (shipCell.position.x === x && shipCell.position.y === y) {
-                    return shottedCell as IShipCell;
-                }
-                return shipCell;
-            });
-            schemaOfEnemyShips[indexOfShottedShip] = updatedShottedShip;
-            const killedShip: TEnemyShip | undefined = schemaOfEnemyShips.find(ship => ship.every(shipCell => shipCell.status === "shotted" ));
-            
-            if (killedShip) {
-                status = "killed";
-                connections[enemyPlayerId].numberOfShips = connections[enemyPlayerId].numberOfShips - 1;
-                const indexOfKilledShip = schemaOfEnemyShips.indexOf(killedShip);
-                const updatedKilledShip: TEnemyShip = killedShip.map((shipCell: IShipCell) => {
-                    return {
-                        ...shipCell,
-                        status: "isKilled"
+        const shottedShipWithAlreadyShottedCell = shottedShip.find(shipCell => {
+            const alreadyShotted = shipCell.status === "shotted";
+            return shipCell.position.x === x && shipCell.position.y === y && alreadyShotted
+        });
+        const shottedShipAlreadyKilled = shottedShip.every(shipCell => shipCell.status === "isKilled");
+        if (shottedShipWithAlreadyShottedCell) {
+            status = "shot";
+        } else if (shottedShipAlreadyKilled){
+            status = "killed";
+        } else {
+            status = shottedShip.length === 1 ? "killed" : "shot";
+            const indexOfShottedShip = schemaOfEnemyShips.indexOf(shottedShip);
+            let shottedCell: IShipCell | undefined = shottedShip.find((shipCell: IShipCell) =>
+                shipCell.position.x === x && shipCell.position.y === y);
+            if (shottedCell) {
+                shottedCell.status = "shotted"; 
+
+                const updatedShottedShip = shottedShip.map((shipCell: IShipCell) => {
+                    if (shipCell.position.x === x && shipCell.position.y === y) {
+                        return shottedCell as IShipCell;
                     }
+                    return shipCell;
                 });
-                schemaOfEnemyShips[indexOfKilledShip] = updatedKilledShip;
-            }
+                schemaOfEnemyShips[indexOfShottedShip] = updatedShottedShip;
+                const killedShip: TEnemyShip | undefined = schemaOfEnemyShips.find(ship => ship.every(shipCell => shipCell.status === "shotted" ));
+
+                if (killedShip) {
+                    status = "killed";
+                    connections[enemyPlayerId].numberOfShips = connections[enemyPlayerId].numberOfShips - 1;
+                    const indexOfKilledShip = schemaOfEnemyShips.indexOf(killedShip);
+                    const updatedKilledShip: TEnemyShip = killedShip.map((shipCell: IShipCell) => {
+                        return {
+                            ...shipCell,
+                            status: "isKilled"
+                        }
+                    });
+                    schemaOfEnemyShips[indexOfKilledShip] = updatedKilledShip;
+                    }
+                }
         }     
     }
     if (status && status !== "killed") {
@@ -100,7 +112,7 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
     if (status === "killed" || status === "shot") {
         setTurn(connections, attackingPlayerId);
     } else if (status === "miss") {
-        schemaOfEnemyShips = undefined;
+        schemaOfEnemyShips = [];
         setTurn(connections, enemyPlayerId);
     }
 
@@ -108,8 +120,10 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
         const finishData: IFinishData = {
             winPlayer: attackingPlayerId
         }
-        schemaOfEnemyShips = undefined;
-
+        schemaOfEnemyShips = [];
+        connections[attackingPlayerId].schemaOfEnemyShips = [];
+        connections[enemyPlayerId].schemaOfEnemyShips = [];
+        
         const res = {
             type: EResType.FINISH,
             data: JSON.stringify(finishData),
@@ -117,5 +131,6 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
         }
         sendToRoomClients(connections, res);
         updateWinnersData(attackingPlayerId, connections)
+        }
     }
 }
