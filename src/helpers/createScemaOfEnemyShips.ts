@@ -1,6 +1,6 @@
 import { IPosition, IShipCell, IShipsData, TSchemaOfEnemyShips, TEnemyShip } from "../models/shipsModels.js";
 
-export const createSchemaOfShottedEnemyShips = (ships: IShipsData[]): TSchemaOfEnemyShips => {
+export const createSchemaOfEnemyShips = (ships: IShipsData[]): TSchemaOfEnemyShips => {
     return ships.map((ship: IShipsData) => {
         if (ship.length === 1) {
             const uniqueCell: IShipCell = {
@@ -10,7 +10,7 @@ export const createSchemaOfShottedEnemyShips = (ships: IShipsData[]): TSchemaOfE
             return [uniqueCell];
         } else {
             let shipCells: TEnemyShip = [];
-            const firstCell = {
+            const firstCell: IShipCell = {
                 status: "alive",
                 position: ship.position
             }

@@ -28,7 +28,6 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
                 id: loginRes.index,
                 ships: [],
                 wins: 0,
-                numberOfShips: 0,
                 schemaOfEnemyShips: []
             };
             break;
@@ -51,7 +50,6 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
         case EReqType.ADD_SHIPS: {
             const shipsData: IAddShipsData = JSON.parse(req.data);
             connections[shipsData.indexPlayer].ships = shipsData.ships;
-            connections[shipsData.indexPlayer].numberOfShips = shipsData.ships.length;
             addShips(connections);
             break;
         }
