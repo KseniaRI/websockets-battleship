@@ -1,6 +1,6 @@
 import { IRoomData, IUpdateRoom } from "../../models/roomModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
-import { sendToAllClients } from "../../helpers/sendData.js";
+import { sendToAllClients } from "../../helpers/index.js";
 
 export const updateRoom = (roomData: IRoomData[]) => {
     const res: IUpdateRoom = {

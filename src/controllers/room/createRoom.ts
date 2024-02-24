@@ -1,4 +1,4 @@
-import { generateIdx } from "../../helpers/generateIdx.js";
+import { generateIdx } from "../../helpers/index.js";
 import { IRoomData } from "../../models/roomModels.js";
 import { updateRoom } from "./updateRoom.js";
 

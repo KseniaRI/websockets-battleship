@@ -1,11 +1,10 @@
 import { WebSocket } from "ws";
-import { generateIdx } from "../../helpers/generateIdx.js";
 import { ILoginReq, ILoginReqData, ILoginRes, ILoginResData } from "../../models/loginModels.js";
 import { EResType } from "../../models/reqAndResModels.js";
-import { updateRoom } from "../room/updateRoom.js";
-import { updateWinners } from "./updateWinners.js";
 import { IRoomData, IRoomUser } from "../../models/roomModels.js";
-import { sendToClient } from "../../helpers/sendData.js";
+import { sendToClient, generateIdx } from "../../helpers/index.js";
+import { updateWinners } from "./updateWinners.js";
+import { updateRoom } from "../index.js";
 
 export const loginAndCreatePlayer = (req: ILoginReq, socket: WebSocket, room?: IRoomData) => {
     const { data } = req;

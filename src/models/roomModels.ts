@@ -1,6 +1,4 @@
-import { WebSocket } from "ws"
 import { EReqType, EResType } from "./reqAndResModels.js"
-import { IAddShipsData, IShipsData } from "./shipsModels.js"
 
 export interface ICreateRoomReq {
     type: EReqType.CREATE_ROOM,
@@ -43,6 +41,3 @@ export interface ICreateGame {
     id: 0
 }
 
-export type TConnections = {
-    [key: string]: WebSocket
-}

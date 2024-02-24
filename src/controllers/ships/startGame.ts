@@ -1,15 +1,15 @@
 import { WebSocket } from "ws";
-import { TConnections } from "../../models/roomModels.js";
-import { IAddShipsData, IStartGame, IStartGameData } from "../../models/shipsModels.js";
+import { IStartGame, IStartGameData } from "../../models/shipsModels.js";
+import { TConnections } from "../../models/connections.js";
 import { EResType } from "../../models/reqAndResModels.js";
-import { sendToClient } from "../../helpers/sendData.js";
+import { sendToClient } from "../../helpers/index.js";
 
-export const startGame = (connections: TConnections, clientsShipsData: IAddShipsData[]) => {
-    clientsShipsData.forEach(({ships, indexPlayer}) => {
-        const socket: WebSocket = connections[indexPlayer];
+export const startGame = (connections: TConnections) => {
+    for (const index in connections) {
+        const socket: WebSocket = connections[index].socket;
         const startGameData: IStartGameData = {
-            ships: [...ships],
-            currentPlayerIndex: indexPlayer, 
+            ships: [...connections[index].ships],
+            currentPlayerIndex: index, 
         }
         const res: IStartGame = {
             type: EResType.START_GAME,
@@ -17,5 +17,5 @@ export const startGame = (connections: TConnections, clientsShipsData: IAddShips
             id: 0,
         };
         sendToClient(socket, res);
-    })       
+    }       
 }

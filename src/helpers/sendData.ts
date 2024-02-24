@@ -3,7 +3,7 @@ import { wsServer } from "../ws_server/index.js";
 import { EResType } from "../models/reqAndResModels.js";
 import { IPosition, TEnemyShip } from "../models/shipsModels.js";
 import { IAttackFeedbackData } from "../models/gameModels.js";
-import { TConnections } from "../models/roomModels.js";
+import { TConnections } from "../models/connections.js";
 
 export const sendToAllClients = (message: any) => {
     wsServer.clients.forEach(client => {
@@ -19,7 +19,7 @@ export const sendToClient = (client: WebSocket, message: any) => {
 
 export const sendToRoomClients = (connections: TConnections, res: any) => {
     for (const index in connections) {
-        const socket: WebSocket = connections[index];
+        const socket: WebSocket = connections[index].socket;
         sendToClient(socket, res);
     }
 }

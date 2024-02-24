@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { wsServer } from './src/ws_server/index.ts';
 import { httpServer } from "./src/http_server/index.ts"; 
 import { handleRequest } from './src/lib/handleRequest.ts';
-import { handleTerminationSignals } from './src/helpers/handleTerminationSignals.ts'
+import { handleTerminationSignals } from './src/helpers/index.ts'
 
 const HTTP_PORT = 8181;
 

@@ -1,12 +1,14 @@
-import { IAddShipsData } from "../../models/shipsModels.js"
+import { IShipsData } from "../../models/shipsModels.js"
+import { TConnections } from "../../models/connections.js";
+import { setTurn } from "../index.js";
 import { startGame } from "./startGame.js";
-import { setTurn } from "../game/setTurn.js";
-import { TConnections } from "../../models/roomModels.js";
 
-export const addShips = (clientsShipsData: IAddShipsData[], connections: TConnections) => {
-    if (clientsShipsData.length === 2) {
-        startGame(connections, clientsShipsData); 
-        const clientsIndexes = clientsShipsData.map(data => data.indexPlayer);
-        setTurn(connections, clientsIndexes[0]);
+export const addShips = (connections: TConnections) => {
+    const shipsOfAllPlayersAdded = Object.values(connections)
+        .map(connection => connection.ships)
+        .every((ships: IShipsData[]) => ships.length > 0);
+    if (shipsOfAllPlayersAdded) {
+        startGame(connections); 
+        setTurn(connections, Object.keys(connections)[0]);
     }
 }

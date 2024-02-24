@@ -1,33 +1,28 @@
-import { IAttackFeedbackData, IAttackStatus, IFinishData, IRandomAttackData, IReqAttackData } from "../../models/gameModels.js";
-import { EResType } from "../../models/reqAndResModels.js";
-import { TConnections } from "../../models/roomModels.js";
-import { IAddShipsData, IShipCell, TSchemaOfEnemyShips, TEnemyShip } from "../../models/shipsModels.js";
-import { createSchemaOfShottedEnemyShips } from "../../helpers/createScemaofShottedEnemyShips.js";
-import { sendDataToAdjiacentCell, sendToRoomClients } from "../../helpers/sendData.js";
-import { setTurn } from "./setTurn.js";
-import { getAttachedCoordinates } from "../../helpers/generateCoord.js";
 import { WebSocket } from "ws";
+import { IAttackFeedbackData, IAttackStatus, IFinishData, IRandomAttackData, IReqAttackData } from "../../models/gameModels.js";
+import { IShipCell, TSchemaOfEnemyShips, TEnemyShip, IShipsData } from "../../models/shipsModels.js";
+import { EResType } from "../../models/reqAndResModels.js";
+import { TConnections } from "../../models/connections.js";
+import { setTurn } from "./setTurn.js";
+import {
+    getAttackedCoordinates,
+    createSchemaOfShottedEnemyShips,
+    sendToRoomClients,
+    sendDataToAdjiacentCell, 
+    updateWinnersData,
+} from '../../helpers/index.js'
 
 let schemaOfEnemyShips: TSchemaOfEnemyShips | undefined;
-let numberEnemyShips: number | undefined;
 
-export const sendAttackFeedback = (
-    connections: TConnections,
-    attackData: IReqAttackData | IRandomAttackData,
-    clientsShipsData: IAddShipsData[],
-) => {
-    const { indexPlayer: attackingPlayer } = attackData;
-    const { x, y } = getAttachedCoordinates(attackData); 
-
-    const enemyShipsData: IAddShipsData = clientsShipsData.find(shipsData =>
-        shipsData.indexPlayer !== attackingPlayer)!;
+export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData | IRandomAttackData) => {
+    const { indexPlayer: attackingPlayerId } = attackData;
+    const { x, y } = getAttackedCoordinates(attackData); 
     
-    if (!numberEnemyShips) {
-        numberEnemyShips= enemyShipsData.ships.length;
-    } 
+    const enemyPlayerId = Object.keys(connections).find(key => key !== attackingPlayerId)!;
+    const enemyShips: IShipsData[] = connections[enemyPlayerId].ships;
     
     if (!schemaOfEnemyShips) {
-        schemaOfEnemyShips = createSchemaOfShottedEnemyShips(enemyShipsData.ships);
+        schemaOfEnemyShips = createSchemaOfShottedEnemyShips(enemyShips);
     }
 
     let status: IAttackStatus | undefined;
@@ -57,7 +52,7 @@ export const sendAttackFeedback = (
             
             if (killedShip) {
                 status = "killed";
-                numberEnemyShips--;
+                connections[enemyPlayerId].numberOfShips = connections[enemyPlayerId].numberOfShips - 1;
                 const indexOfKilledShip = schemaOfEnemyShips.indexOf(killedShip);
                 const updatedKilledShip: TEnemyShip = killedShip.map((shipCell: IShipCell) => {
                     return {
@@ -72,7 +67,7 @@ export const sendAttackFeedback = (
     if (status && status !== "killed") {
         const attackFeedbackData: IAttackFeedbackData = {
             position: { x, y },
-            currentPlayer: attackingPlayer,
+            currentPlayer: attackingPlayerId,
             status,
         }
         const res = {
@@ -85,7 +80,7 @@ export const sendAttackFeedback = (
         shottedShip?.forEach((shipCell: IShipCell) => {
             const attackFeedbackData: IAttackFeedbackData = {
                 position: shipCell.position,
-                currentPlayer: attackingPlayer,
+                currentPlayer: attackingPlayerId,
                 status: "killed",
             }
             const res = {
@@ -96,24 +91,23 @@ export const sendAttackFeedback = (
             sendToRoomClients(connections, res);
             
             for (const index in connections) {
-                const socket: WebSocket = connections[index];
-                sendDataToAdjiacentCell(socket, shipCell.position, shottedShip, attackingPlayer);
+                const socket: WebSocket = connections[index].socket;
+                sendDataToAdjiacentCell(socket, shipCell.position, shottedShip, attackingPlayerId);
             }
         })
     }
 
     if (status === "killed" || status === "shot") {
-        setTurn(connections, attackingPlayer);
+        setTurn(connections, attackingPlayerId);
     } else if (status === "miss") {
         schemaOfEnemyShips = undefined;
-        setTurn(connections, enemyShipsData.indexPlayer);
+        setTurn(connections, enemyPlayerId);
     }
 
-    if (numberEnemyShips === 0) {
+    if (connections[enemyPlayerId].numberOfShips === 0) {
         const finishData: IFinishData = {
-            winPlayer: attackingPlayer
+            winPlayer: attackingPlayerId
         }
-        //check
         schemaOfEnemyShips = undefined;
 
         const res = {
@@ -122,6 +116,6 @@ export const sendAttackFeedback = (
             id: 0,
         }
         sendToRoomClients(connections, res);
-        return attackingPlayer;
+        updateWinnersData(attackingPlayerId, connections)
     }
 }
