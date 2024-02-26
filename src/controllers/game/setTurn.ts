@@ -4,6 +4,7 @@ import { TConnections } from "../../models/connections.js";
 import { sendToRoomClients } from "../../helpers/index.js";
 
 export const setTurn = (connections: TConnections, clientIndex: string) => {
+    connections[clientIndex].turn = true;
     const turnData: ITurnData = {
         currentPlayer: clientIndex,
     }

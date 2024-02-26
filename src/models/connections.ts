@@ -8,7 +8,8 @@ export type TConnections = {
         id: string,
         ships: IShipsData[],
         wins: number,
-        schemaOfEnemyShips: TSchemaOfEnemyShips 
+        schemaOfEnemyShips: TSchemaOfEnemyShips,
+        turn: boolean 
     }
 }
 

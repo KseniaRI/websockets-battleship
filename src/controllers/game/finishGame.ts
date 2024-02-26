@@ -19,5 +19,6 @@ export const finishGame = (
         id: 0,
     }
     sendToRoomClients(connections, res);
-    updateWinnersData(attackingPlayerId, connections)
+    updateWinnersData(attackingPlayerId, connections);
+    connections[attackingPlayerId].turn = false;
 }
