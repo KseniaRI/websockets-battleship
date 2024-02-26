@@ -11,17 +11,16 @@ import {
     createRoom,
     loginAndCreatePlayer
 } from "../controllers/index.js";
+import { getRoomConnections } from "../helpers/getRoomConnections.js";
 
 let loginRes: ILoginResData;
-let room: IRoomData;
+let rooms: IRoomData[] = [];
 const connections: TConnections = {};
 
 export const handleRequest = (req: ReqType, socket: WebSocket) => {
     switch (req.type) {
         case EReqType.REG: {
-            room
-                ? loginRes = loginAndCreatePlayer(req, socket, room)
-                : loginRes = loginAndCreatePlayer(req, socket);
+            loginRes = loginAndCreatePlayer(req, socket, rooms)
             if (loginRes) {
                 connections[loginRes.index] = {
                     socket,
@@ -30,22 +29,23 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
                     ships: [],
                     wins: 0,
                     schemaOfEnemyShips: [],
-                    turn: false
+                    turn: false,
+                    roomId: ""
                 };
             }
             break;
         }
         case EReqType.CREATE_ROOM: {
-            const roomData = createRoom();
-            room = { ...roomData };
+            const roomData = createRoom(rooms);
+            rooms.push(roomData);
             break;
         }
         case EReqType.ADD_USER_TO_ROOM: {
             const plaerToAddId = Object.keys(connections).find(key => connections[key].socket === socket);
             if (plaerToAddId) {
-                const roomData = addUserToRoom(req, room, connections, plaerToAddId);
-                if (roomData) {
-                    room = { ...roomData };
+                const updatedRooms = addUserToRoom(req, connections, plaerToAddId, rooms);
+                if (updatedRooms) {
+                    rooms = [...updatedRooms];
                 }
             }
             break;
@@ -53,14 +53,18 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
         case EReqType.ADD_SHIPS: {
             const shipsData: IAddShipsData = JSON.parse(req.data);
             connections[shipsData.indexPlayer].ships = shipsData.ships;
-            addShips(connections);
+            const roomId = connections[shipsData.indexPlayer].roomId;
+            const roomConnections = getRoomConnections(connections, roomId);
+            addShips(roomConnections);
             break;
         }
-        case EReqType.ATTACK:
+        case EReqType.ATTACK: {
             attack(req, connections);
             break;
-        case EReqType.RANDOM_ATTACK:
+        }
+        case EReqType.RANDOM_ATTACK: {
             attack(req, connections);
-        break;
+            break;
+        }
     }     
 }

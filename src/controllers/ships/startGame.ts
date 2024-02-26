@@ -4,11 +4,11 @@ import { TConnections } from "../../models/connections.js";
 import { EResType } from "../../models/reqAndResModels.js";
 import { sendToClient } from "../../helpers/index.js";
 
-export const startGame = (connections: TConnections) => {
-    for (const index in connections) {
-        const socket: WebSocket = connections[index].socket;
+export const startGame = (roomConnections: TConnections) => {
+    for (const index in roomConnections) {
+        const socket: WebSocket = roomConnections[index].socket;
         const startGameData: IStartGameData = {
-            ships: [...connections[index].ships],
+            ships: [...roomConnections[index].ships],
             currentPlayerIndex: index, 
         }
         const res: IStartGame = {

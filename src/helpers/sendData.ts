@@ -17,9 +17,9 @@ export const sendToClient = (client: WebSocket, message: any) => {
     client.send(JSON.stringify(message));
 };
 
-export const sendToRoomClients = (connections: TConnections, res: any) => {
-    for (const index in connections) {
-        const socket: WebSocket = connections[index].socket;
+export const sendToRoomClients = (roomConnections: TConnections, res: any) => {
+    for (const index in roomConnections) {
+        const socket: WebSocket = roomConnections[index].socket;
         sendToClient(socket, res);
     }
 }

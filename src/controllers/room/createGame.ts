@@ -4,10 +4,10 @@ import { EResType } from "../../models/reqAndResModels.js";
 import { TConnections } from "../../models/connections.js";
 import { generateIdx, sendToClient } from "../../helpers/index.js";
 
-export const createGame = (connections: TConnections) => {
+export const createGame = (roomConnections: TConnections) => {
     const idGame = generateIdx();
-    for (const index in connections) {
-        const socket: WebSocket = connections[index].socket;
+    for (const index in roomConnections) {
+        const socket: WebSocket = roomConnections[index].socket;
         const createdGameData: ICreatedGameData = {
             idGame,
             idPlayer: index

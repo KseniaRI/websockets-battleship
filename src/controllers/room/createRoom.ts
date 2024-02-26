@@ -2,12 +2,12 @@ import { generateIdx } from "../../helpers/index.js";
 import { IRoomData } from "../../models/roomModels.js";
 import { updateRoom } from "./updateRoom.js";
 
-export const createRoom = () => {
+export const createRoom = (rooms: IRoomData[]) => {
     const roomId = generateIdx();
     const newRoomData: IRoomData = {
         roomId,
         roomUsers: [],
     };
-    updateRoom([newRoomData])
-    return newRoomData;
+    updateRoom([...rooms, newRoomData]);
+    return newRoomData;//?
 }

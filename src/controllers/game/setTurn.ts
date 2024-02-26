@@ -3,8 +3,8 @@ import { ITurn, ITurnData } from "../../models/gameModels.js";
 import { TConnections } from "../../models/connections.js";
 import { sendToRoomClients } from "../../helpers/index.js";
 
-export const setTurn = (connections: TConnections, clientIndex: string) => {
-    connections[clientIndex].turn = true;
+export const setTurn = (roomConnections: TConnections, clientIndex: string) => {
+    roomConnections[clientIndex].turn = true;
     const turnData: ITurnData = {
         currentPlayer: clientIndex,
     }
@@ -13,5 +13,5 @@ export const setTurn = (connections: TConnections, clientIndex: string) => {
         data: JSON.stringify(turnData),
         id: 0
     }
-    sendToRoomClients(connections, res);
+    sendToRoomClients(roomConnections, res);
 }

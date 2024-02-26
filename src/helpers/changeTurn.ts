@@ -3,15 +3,15 @@ import { TConnections } from "../models/connections.js";
 import { IAttackStatus } from "../models/gameModels.js";
 
 export const changeTurn = (
-    connections: TConnections,
+    roomConnections: TConnections,
     resStatus: IAttackStatus,
     attackingPlayerId: string,
     enemyPlayerId: string,
 ) => {
     if (resStatus === "killed" || resStatus === "shot") {
-        setTurn(connections, attackingPlayerId);
+        setTurn(roomConnections, attackingPlayerId);
     } else if (resStatus === "miss") {
-        connections[attackingPlayerId].turn = false;
-        setTurn(connections, enemyPlayerId);    
+        roomConnections[attackingPlayerId].turn = false;
+        setTurn(roomConnections, enemyPlayerId);    
     }
 }

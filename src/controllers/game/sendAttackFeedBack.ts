@@ -11,14 +11,18 @@ import {
     changeTurn, 
 } from '../../helpers/index.js'
 
-export const sendAttackFeedback = (connections: TConnections, attackData: IReqAttackData | IRandomAttackData) => {
+export const sendAttackFeedback = (
+    roomConnections: TConnections,
+    attackData: IReqAttackData | IRandomAttackData,
+    connections: TConnections
+) => {
     const { indexPlayer: attackingPlayerId } = attackData;
     const { x, y } = getAttackedCoordinates(attackData);
     
-    const enemyPlayerId = Object.keys(connections).find(key => key !== attackingPlayerId)!;
+    const enemyPlayerId = Object.keys(roomConnections).find(key => key !== attackingPlayerId)!;
     let resStatus: IAttackStatus | undefined;
     
-    const shottedShip: TEnemyShip | undefined = connections[attackingPlayerId].schemaOfEnemyShips.find((ship: TEnemyShip) =>
+    const shottedShip: TEnemyShip | undefined = roomConnections[attackingPlayerId].schemaOfEnemyShips.find((ship: TEnemyShip) =>
         ship.find((shipCell: IShipCell) => shipCell.position.x === x && shipCell.position.y === y)
     )        
     
@@ -36,7 +40,7 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
         } else {
             resStatus = shottedShip.length === 1 ? "killed" : "shot";
             shottedCell.status = "shotted";
-            const killedShip: TEnemyShip | undefined = connections[attackingPlayerId].schemaOfEnemyShips.find(ship =>
+            const killedShip: TEnemyShip | undefined = roomConnections[attackingPlayerId].schemaOfEnemyShips.find(ship =>
                 ship.every((shipCell: IShipCell) => shipCell.status === "shotted"));
             
             if (killedShip) {
@@ -56,7 +60,7 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
             data: JSON.stringify(attackFeedbackData),
             id: 0,
         }
-        sendToRoomClients(connections, res);
+        sendToRoomClients(roomConnections, res);
     } else if (resStatus === "killed") {
         shottedShip?.forEach((shipCell: IShipCell) => {
             const attackFeedbackData: IAttackFeedbackData = {
@@ -69,18 +73,18 @@ export const sendAttackFeedback = (connections: TConnections, attackData: IReqAt
                 data: JSON.stringify(attackFeedbackData),
                 id: 0,
             }
-            sendToRoomClients(connections, res);
-            for (const index in connections) {
-                const socket: WebSocket = connections[index].socket;
+            sendToRoomClients(roomConnections, res);
+            for (const index in roomConnections) {
+                const socket: WebSocket = roomConnections[index].socket;
                 sendDataToAdjiacentCell(socket, shipCell.position, shottedShip, attackingPlayerId);
             }
         })
     }
-    changeTurn(connections, resStatus, attackingPlayerId, enemyPlayerId);
+    changeTurn(roomConnections, resStatus, attackingPlayerId, enemyPlayerId);
     
-    const allShipsKilled = connections[attackingPlayerId].schemaOfEnemyShips.every((ship: TEnemyShip) =>
+    const allShipsKilled = roomConnections[attackingPlayerId].schemaOfEnemyShips.every((ship: TEnemyShip) =>
         ship.every(shipCell => shipCell.status === "isKilled"));
     if (allShipsKilled) {
-        finishGame(connections, attackingPlayerId, enemyPlayerId);
+        finishGame(roomConnections, connections, attackingPlayerId, enemyPlayerId);
     }
 }
