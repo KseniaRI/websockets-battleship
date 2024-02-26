@@ -22,15 +22,17 @@ export const handleRequest = (req: ReqType, socket: WebSocket) => {
             room
                 ? loginRes = loginAndCreatePlayer(req, socket, room)
                 : loginRes = loginAndCreatePlayer(req, socket);
-            connections[loginRes.index] = {
-                socket,
-                name: loginRes.name,
-                id: loginRes.index,
-                ships: [],
-                wins: 0,
-                schemaOfEnemyShips: [],
-                turn: false
-            };
+            if (loginRes) {
+                connections[loginRes.index] = {
+                    socket,
+                    name: loginRes.name,
+                    id: loginRes.index,
+                    ships: [],
+                    wins: 0,
+                    schemaOfEnemyShips: [],
+                    turn: false
+                };
+            }
             break;
         }
         case EReqType.CREATE_ROOM: {

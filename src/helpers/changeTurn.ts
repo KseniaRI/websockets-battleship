@@ -9,7 +9,7 @@ export const changeTurn = (
     enemyPlayerId: string,
 ) => {
     if (resStatus === "killed" || resStatus === "shot") {
-            setTurn(connections, attackingPlayerId);
+        setTurn(connections, attackingPlayerId);
     } else if (resStatus === "miss") {
         connections[attackingPlayerId].turn = false;
         setTurn(connections, enemyPlayerId);    

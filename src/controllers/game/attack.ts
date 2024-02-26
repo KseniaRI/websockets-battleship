@@ -9,5 +9,7 @@ export const attack = (
     const { data } = req;
     const parsedAttackData: IReqAttackData | IRandomAttackData = JSON.parse(data);
     const isPlayerTurn = connections[parsedAttackData.indexPlayer].turn; 
-    isPlayerTurn && sendAttackFeedback(connections, parsedAttackData);
+    if (isPlayerTurn) {
+        sendAttackFeedback(connections, parsedAttackData);
+    } 
 }
